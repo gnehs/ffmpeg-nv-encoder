@@ -35,7 +35,7 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
             })
             .on('error', (err) => {
                 console.error(`[ffmpeg] error: \n${err.message}`);
-                reject(err);
+                resolve(err);
             })
             .on('end', () => {
                 console.log(`[ffmpeg] ${filename} finished.`);
