@@ -30,13 +30,13 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
             .videoCodec(encoder)
             .audioCodec('copy')
             .on('start', commandLine => {
-                console.log('\nSpawned FFmpeg with command: \n' + commandLine);
+                console.log('\n[ffmpeg] Spawned FFmpeg with command: \n' + commandLine + '\n');
             })
             .on('progress', ({ percent, frames, currentFps, currentKbps, targetSize, timemark }) => {
-                console.log(`Processing: ${percent}% done, ${currentFps},${frames}`);
+                console.log(`[ffmpeg] Processing: ${parseInt(percent)}%, ${currentFps}fps, ${timemark}`);
             })
             .on('error', function (err, stdout, stderr) {
-                console.log('Cannot process video: ' + err.message);
+                console.log('[ffmpeg] Cannot process video: ' + err.message);
                 reject(err.message)
             })
             .on('end', () => {
@@ -50,7 +50,7 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
         try {
             // check if file exists
             if (!fs.existsSync(path.resolve(outputDir, filename)) && fs.lstatSync(path.resolve(inputDir, filename)).isFile()) {
-                console.log(`[ffmpeg] 開始轉換: \n${filename}`);
+                console.log(`[ffmpeg] 開始轉換: ${filename}`);
                 await parseVideo(filename)
             }
         } catch (e) {
