@@ -27,21 +27,23 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
     console.log(`encoder  : ${encoder}`)
 
     let parseVideo = filename => new Promise((resolve, reject) => {
-        ffmpeg(path.resolve(inputDir, filename))
-            .videoCodec(encoder)
-            .audioCodec('copy')
-            .on('start', commandLine => {
-                console.log('Spawned FFmpeg with command: \n' + commandLine);
-            })
-            .on('error', (err) => {
-                console.error(`[ffmpeg] error: \n${err.message}`);
-                resolve(err);
-            })
-            .on('end', () => {
-                console.log(`[ffmpeg] ${filename} finished.`);
-                resolve();
-            })
-            .save(path.resolve(outputDir, filename))
+        // check if file exists
+        if (!fs.existsSync(path.resolve(outputDir, filename)))
+            ffmpeg(path.resolve(inputDir, filename))
+                .videoCodec(encoder)
+                .audioCodec('copy')
+                .on('start', commandLine => {
+                    console.log('Spawned FFmpeg with command: \n' + commandLine);
+                })
+                .on('error', (err) => {
+                    console.error(`[ffmpeg] error: \n${err.message}`);
+                    resolve(err);
+                })
+                .on('end', () => {
+                    console.log(`[ffmpeg] ${filename} finished.`);
+                    resolve();
+                })
+                .save(path.resolve(outputDir, filename))
     });
     await asyncPool(4, fs.readdirSync(inputDir), parseVideo)
 })();
