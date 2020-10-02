@@ -26,29 +26,31 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
     console.log(`encoder  : ${encoder}`)
 
     let parseVideo = filename => new Promise((resolve, reject) => {
-        // check if file exists
-        if (!fs.existsSync(path.resolve(outputDir, filename)))
-
-            ffmpeg(path.resolve(inputDir, filename))
-                .videoCodec(encoder)
-                .audioCodec('copy')
-                .on('start', commandLine => {
-                    console.log('\nSpawned FFmpeg with command: \n' + commandLine);
-                })
-                .on('error', function (err, stdout, stderr) {
-                    console.log('Cannot process video: ' + err.message);
-                })
-                .on('end', () => {
-                    console.log(`[ffmpeg] ${filename} finished.`);
-                    resolve();
-                })
-                .save(path.resolve(outputDir, filename))
+        ffmpeg(path.resolve(inputDir, filename))
+            .videoCodec(encoder)
+            .audioCodec('copy')
+            .on('start', commandLine => {
+                console.log('\nSpawned FFmpeg with command: \n' + commandLine);
+            })
+            .on('error', function (err, stdout, stderr) {
+                console.log('Cannot process video: ' + err.message);
+            })
+            .on('end', () => {
+                console.log(`[ffmpeg] ${filename} finished.`);
+                resolve();
+            })
+            .save(path.resolve(outputDir, filename))
 
     });
-    for (let filename of fs.readdirSync(inputDir))
+    for (let filename of fs.readdirSync(inputDir)) {
+        console.error(`[ffmpeg] 開始轉換: \n${filename}`);
         try {
-            await parseVideo(filename)
+            // check if file exists
+            if (!fs.existsSync(path.resolve(outputDir, filename))) {
+                await parseVideo(filename)
+            }
         } catch (e) {
             console.error(`[ffmpeg] error: \n${e.message}`);
         }
+    }
 })();
