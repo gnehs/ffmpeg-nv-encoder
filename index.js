@@ -2,7 +2,6 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
 const prompt = require('prompt-sync')();
-const asyncPool = require('tiny-async-pool');
 // folder
 let inputDir = process.argv[2]
 let outputDir = path.resolve(inputDir, './output/');
@@ -29,22 +28,27 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
     let parseVideo = filename => new Promise((resolve, reject) => {
         // check if file exists
         if (!fs.existsSync(path.resolve(outputDir, filename)))
-            try {
-                ffmpeg(path.resolve(inputDir, filename))
-                    .videoCodec(encoder)
-                    .audioCodec('copy')
-                    .on('start', commandLine => {
-                        console.log('\nSpawned FFmpeg with command: \n' + commandLine);
-                    })
-                    .on('end', () => {
-                        console.log(`[ffmpeg] ${filename} finished.`);
-                        resolve();
-                    })
-                    .save(path.resolve(outputDir, filename))
-            } catch (e) {
-                console.error(`[ffmpeg] error: \n${e.message}`);
-                resolve();
-            }
+
+            ffmpeg(path.resolve(inputDir, filename))
+                .videoCodec(encoder)
+                .audioCodec('copy')
+                .on('start', commandLine => {
+                    console.log('\nSpawned FFmpeg with command: \n' + commandLine);
+                })
+                .on('error', function (err, stdout, stderr) {
+                    console.log('Cannot process video: ' + err.message);
+                })
+                .on('end', () => {
+                    console.log(`[ffmpeg] ${filename} finished.`);
+                    resolve();
+                })
+                .save(path.resolve(outputDir, filename))
+
     });
-    await asyncPool(4, fs.readdirSync(inputDir), parseVideo)
+    for (let filename of fs.readdirSync(inputDir))
+        try {
+            await parseVideo(filename)
+        } catch (e) {
+            console.error(`[ffmpeg] error: \n${e.message}`);
+        }
 })();
