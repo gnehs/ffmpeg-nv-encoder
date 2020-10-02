@@ -45,7 +45,7 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
     for (let filename of fs.readdirSync(inputDir)) {
         try {
             // check if file exists
-            if (!fs.existsSync(path.resolve(outputDir, filename))) {
+            if (!fs.existsSync(path.resolve(outputDir, filename)) && fs.lstatSync(path.resolve(inputDir, filename)).isFile()) {
                 console.log(`[ffmpeg] 開始轉換: \n${filename}`);
                 await parseVideo(filename)
             }
