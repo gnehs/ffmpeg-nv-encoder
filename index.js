@@ -4,7 +4,10 @@ const path = require('path');
 const prompt = require('prompt-sync')();
 // folder
 let inputDir = process.argv[2]
-let outputDir = path.resolve(inputDir, '/output/');
+let outputDir = path.resolve(inputDir, './output/');
+if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir);
+}
 // encoder & decoder
 let list2console = list => list.map((x, i) => (`${i + 1}. ${x}`)).join('\n')
 let encoderList = ['hevc_nvenc', 'h264_nvenc']
