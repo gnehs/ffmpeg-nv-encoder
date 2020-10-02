@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const prompt = require('prompt-sync')();
 // folder
-let inputDir = prompt('input files dir: ');
+let inputDir = process.argv[2]
 let outputDir = path.resolve(inputDir, '/output/');
 // encoder & decoder
 let list2console = list => list.map((x, i) => (`${i + 1}. ${x}`)).join('\n')
@@ -21,7 +21,7 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
     console.log(`encoder  : ${encoder}`)
 
     let parseVideo = filename => new Promise((resolve, reject) => {
-        ffmpeg(path.resolve(inputDir, filename))
+        ffmpeg(path.join(inputDir, filename))
             .videoCodec(encoder)
             .audioCodec('copy')
             .on('error', (err) => {
@@ -32,7 +32,7 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
                 console.log(`[ffmpeg] ${file} finished.`);
                 resolve();
             })
-            .save(path.resolve(outputDir, filename))
+            .save(path.join(outputDir, filename))
     });
     for (let file of fs.readdirSync(inputDir)) {
         console.log(`[ffmpeg] ${file} proccesing...`);
