@@ -21,7 +21,7 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
     console.log(`encoder  : ${encoder}`)
 
     let parseVideo = filename => new Promise((resolve, reject) => {
-        ffmpeg(path.join(inputDir, filename))
+        ffmpeg(path.resolve(inputDir, filename))
             .videoCodec(encoder)
             .audioCodec('copy')
             .on('error', (err) => {
@@ -32,7 +32,7 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
                 console.log(`[ffmpeg] ${file} finished.`);
                 resolve();
             })
-            .save(path.join(outputDir, filename))
+            .save(path.resolve(outputDir, filename))
     });
     for (let file of fs.readdirSync(inputDir)) {
         console.log(`[ffmpeg] ${file} proccesing...`);
