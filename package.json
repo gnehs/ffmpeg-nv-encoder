@@ -11,6 +11,7 @@
   "dependencies": {
     "fluent-ffmpeg": "^2.1.2",
     "prompt-sync": "^4.2.0",
+    "replace-ext": "^2.0.0",
     "tiny-async-pool": "^1.1.0"
   }
 }

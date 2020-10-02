@@ -2,6 +2,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
 const prompt = require('prompt-sync')();
+const replaceExt = require('replace-ext');
 // folder
 let inputDir = process.argv[2]
 let outputDir = path.resolve(inputDir, './output/');
@@ -26,31 +27,37 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
     console.log(`encoder  : ${encoder}`)
 
     let parseVideo = filename => new Promise((resolve, reject) => {
-        ffmpeg(path.resolve(inputDir, filename))
-            .videoCodec(encoder)
-            .audioCodec('copy')
-            .on('start', commandLine => {
-                console.log('\n[ffmpeg] Spawned FFmpeg with command: \n' + commandLine + '\n');
-            })
-            .on('progress', ({ percent, frames, currentFps, currentKbps, targetSize, timemark }) => {
-                console.log(`[ffmpeg] Processing: ${parseInt(percent)}%, ${currentFps}fps, ${timemark}`);
-            })
-            .on('error', function (err, stdout, stderr) {
-                console.log('[ffmpeg] Cannot process video: ' + err.message);
-                reject(err.message)
-            })
-            .on('end', () => {
-                console.log(`[ffmpeg] ${filename} finished.`);
-                resolve();
-            })
-            .save(path.resolve(outputDir, filename))
+        let outputFilePath = replaceExt(path.resolve(outputDir, filename), '.mp4');
+        // check file exists
+        if (!fs.existsSync(outputFilePath)) {
+            ffmpeg(path.resolve(inputDir, filename))
+                .videoCodec(encoder)
+                .audioCodec('copy')
+                .on('start', commandLine => {
+                    console.log('\n[ffmpeg] Spawned FFmpeg with command: \n' + commandLine + '\n');
+                })
+                .on('progress', ({ percent, frames, currentFps, currentKbps, targetSize, timemark }) => {
+                    console.log(`[ffmpeg] Processing: ${parseInt(percent)}%, ${currentFps}fps, ${timemark}`);
+                })
+                .on('error', function (err, stdout, stderr) {
+                    console.log('[ffmpeg] Cannot process video: ' + err.message);
+                    reject(err.message)
+                })
+                .on('end', () => {
+                    console.log(`[ffmpeg] ${filename} finished.`);
+                    resolve();
+                })
+                .save(outputFilePath)
+        }
+        else {
+            resolve();
+        }
 
     });
     for (let filename of fs.readdirSync(inputDir)) {
         try {
-            // check if file exists
-            if (!fs.existsSync(path.resolve(outputDir, filename)) && fs.lstatSync(path.resolve(inputDir, filename)).isFile()) {
-                console.log(`[ffmpeg] 開始轉換: ${filename}`);
+            // check if it is a file
+            if (fs.lstatSync(path.resolve(inputDir, filename)).isFile()) {
                 await parseVideo(filename)
             }
         } catch (e) {
