@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "fluent-ffmpeg": "^2.1.2",
-    "prompt-sync": "^4.2.0"
+    "prompt-sync": "^4.2.0",
+    "tiny-async-pool": "^1.1.0"
   }
 }

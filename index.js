@@ -2,6 +2,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
 const prompt = require('prompt-sync')();
+const asyncPool = require('tiny-async-pool');
 // folder
 let inputDir = process.argv[2]
 let outputDir = path.resolve(inputDir, './output/');
@@ -27,18 +28,21 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
         ffmpeg(path.resolve(inputDir, filename))
             .videoCodec(encoder)
             .audioCodec('copy')
+            .on('start', commandLine => {
+                console.log('Spawned Ffmpeg with command: ' + commandLine);
+            })
+            .on('progress', progress => {
+                console.log('Processing: ' + progress.percent + '% done');
+            })
             .on('error', (err) => {
                 console.error(`[ffmpeg] error: \n${err.message}`);
                 reject(err);
             })
             .on('end', () => {
-                console.log(`[ffmpeg] ${file} finished.`);
+                console.log(`[ffmpeg] ${filename} finished.`);
                 resolve();
             })
             .save(path.resolve(outputDir, filename))
     });
-    for (let file of fs.readdirSync(inputDir)) {
-        console.log(`[ffmpeg] ${file} proccesing...`);
-        await parseVideo(file)
-    }
+    await asyncPool(4, fs.readdirSync(inputDir), parseVideo)
 })();
