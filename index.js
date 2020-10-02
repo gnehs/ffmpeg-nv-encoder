@@ -32,8 +32,12 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
             .on('start', commandLine => {
                 console.log('\nSpawned FFmpeg with command: \n' + commandLine);
             })
+            .on('progress', ({ percent, frames, currentFps, currentKbps, targetSize, timemark }) => {
+                console.log(`Processing: ${percent}% done, ${currentFps},${frames}`);
+            })
             .on('error', function (err, stdout, stderr) {
                 console.log('Cannot process video: ' + err.message);
+                reject(err.message)
             })
             .on('end', () => {
                 console.log(`[ffmpeg] ${filename} finished.`);
