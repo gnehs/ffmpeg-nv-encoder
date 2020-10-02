@@ -43,10 +43,10 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
 
     });
     for (let filename of fs.readdirSync(inputDir)) {
-        console.error(`[ffmpeg] 開始轉換: \n${filename}`);
         try {
             // check if file exists
             if (!fs.existsSync(path.resolve(outputDir, filename))) {
+                console.log(`[ffmpeg] 開始轉換: \n${filename}`);
                 await parseVideo(filename)
             }
         } catch (e) {
