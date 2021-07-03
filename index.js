@@ -33,7 +33,7 @@ let encoder = encoderList[parseInt(prompt('Choose encoder: ')) - 1] || '';
         if (decoder != 'cpu') inputOptions.push('-hwaccel cuvid', `-c:v ${decoder}`)
         // check file exists
         if (!fs.existsSync(outputFilePath)) {
-            ffmpeg(fs.createReadStream(path.resolve(inputDir, filename))
+            ffmpeg(fs.createReadStream(path.resolve(inputDir, filename)))
                 .inputOptions(inputOptions)
                 .outputOptions(['-profile:v main10', '-preset slow'])
                 .videoCodec(encoder)
